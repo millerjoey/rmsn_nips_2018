@@ -35,13 +35,6 @@ action_inputs_only = configs.load_optimal_parameters('treatment_rnn_action_input
 action_w_trajectory_inputs = configs.load_optimal_parameters('treatment_rnn',
                                                              expt_name,
                                                              add_net_name=True)
-censor_w_action_inputs_only = configs.load_optimal_parameters('censor_rnn_action_inputs_only',
-                                                              expt_name,
-                                                              add_net_name=True)
-censor_w_trajectory_inputs = configs.load_optimal_parameters('censor_rnn',
-                                                             expt_name,
-                                                             add_net_name=True)
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__ == "__main__":
@@ -69,14 +62,10 @@ if __name__ == "__main__":
                       'treatment_rnn_action_inputs_only': ("tanh", 'sigmoid'),
                       'treatment_rnn_softmax': ("tanh", 'sigmoid'),
                       'treatment_rnn_action_inputs_only_softmax': ("tanh", 'sigmoid'),
-                      'censor_rnn': ("tanh", 'sigmoid'),
-                      'censor_rnn_action_inputs_only': ("tanh", 'sigmoid')
                       }
 
     configs = {'action_num': action_inputs_only,
-               'action_den': action_w_trajectory_inputs,
-               'censor_num': censor_w_action_inputs_only,
-               'censor_den': censor_w_trajectory_inputs}
+               'action_den': action_w_trajectory_inputs,}
 
     # Setup the simulated datasets
     chemo_coeff = 10
@@ -113,9 +102,9 @@ if __name__ == "__main__":
 
         # Extract only relevant trajs and shift data
         training_processed = core.get_processed_data(training_data, scaling_data, b_predict_actions, b_use_actions_only,
-                                                     b_predict_censoring)
+                                                     False)
         validation_processed = core.get_processed_data(validation_data, scaling_data, b_predict_actions,
-                                                       b_use_actions_only, b_predict_censoring)
+                                                       b_use_actions_only, False)
 
         num_features = training_processed['scaled_inputs'].shape[-1]  # 4 if not b_use_actions_only else 3
         num_outputs = training_processed['scaled_outputs'].shape[-1]  # 1 if not b_predict_actions else 3  # 5
@@ -171,41 +160,47 @@ if __name__ == "__main__":
     # Action with trajs
     weights = {k: get_weights_from_config(configs[k]) for k in configs}
 
-    den = weights['action_den'] * weights['censor_den']
-    num = weights['action_num'] * weights['censor_num']
+    den = weights['action_den']
+    num = weights['action_num']
 
-    propensity_weights = 1.0/den if b_denominator_only else num/den
+    def get_propensity_weights(num, den, b_denominator_only=False):
 
-    # truncation @ 95th and 5th percentiles
-    UB = np.percentile(propensity_weights, 99)
-    LB = np.percentile(propensity_weights, 1)
+        if b_denominator_only:
+            propensity_weights = 1.0/den
+        else:
+            propensity_weights = num/den
+        
+        # truncation @ 95th and 5th percentiles
+        UB = np.percentile(propensity_weights, 99)
+        LB = np.percentile(propensity_weights, 1)
 
-    propensity_weights[propensity_weights > UB] = UB
-    propensity_weights[propensity_weights < LB] = LB
+        propensity_weights[propensity_weights > UB] = UB
+        propensity_weights[propensity_weights < LB] = LB
 
-    # Adjust so for 3 trajectories here
-    horizon = 1
-    (num_patients, num_time_steps) = propensity_weights.shape
-    output = np.ones((num_patients, num_time_steps, horizon))
+        # Adjust so for 3 trajectories here
+        horizon = 1
+        (num_patients, num_time_steps) = propensity_weights.shape
+        output = np.ones((num_patients, num_time_steps, horizon))
 
-    tmp = np.ones((num_patients, num_time_steps))
-    tmp[:, 1:] = propensity_weights[:, :-1]
-    propensity_weights = tmp
+        tmp = np.ones((num_patients, num_time_steps))
+        tmp[:, 1:] = propensity_weights[:, :-1]
+        propensity_weights = tmp
 
-    for i in range(horizon):
-        output[:, :num_time_steps-i, i] = propensity_weights[:, i:]
+        for i in range(horizon):
+            output[:, :num_time_steps-i, i] = propensity_weights[:, i:]
 
-    propensity_weights = output.cumprod(axis=2)
+        propensity_weights = output.cumprod(axis=2)
 
-    suffix = "" if not b_denominator_only else "_den_only"
+        suffix = "" if not b_denominator_only else "_den_only"
 
-    if b_with_validation:
-        save_file = os.path.join(MODEL_ROOT, "propensity_scores_w_validation{}".format(suffix))
-    else:
-        save_file = os.path.join(MODEL_ROOT, "propensity_scores{}".format(suffix))
+        if b_with_validation:
+            save_file = os.path.join(MODEL_ROOT, "propensity_scores_w_validation{}".format(suffix))
+        else:
+            save_file = os.path.join(MODEL_ROOT, "propensity_scores{}".format(suffix))
 
-    print("Saving propensity weights to ", save_file)
-    np.save(save_file, propensity_weights)
+        print("Saving propensity weights to ", save_file)
+        np.save(save_file, propensity_weights)
 
-    print("Weights saved!")
+    get_propensity_weights(num, den, b_denominator_only=True)
+    get_propensity_weights(num, den, b_denominator_only=False)
 

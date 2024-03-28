@@ -30,8 +30,6 @@ specifications = {
      #'rnn_propensity_weighted': (0.1, 4, 100, 64, 0.01, 0.5),
      #'treatment_rnn_action_inputs_only': (0.1, 3, 100, 128, 0.01, 2.0),
      #'treatment_rnn': (0.1, 4, 100, 64, 0.01, 1.0),
-     #'censor_rnn_action_inputs_only': (0.2, 2, 100, 128, 0.01, 0.5),
-     #'censor_rnn': (0.1, 4, 100, 64, 0.01, 2.0),
 }
 ####################################################################################################################
 
@@ -55,7 +53,7 @@ if __name__ == "__main__":
     networks_to_train = get_arguments()
     if networks_to_train == "propensity_networks":
         logging.info("Training propensity networks")
-        net_names = ['censor_rnn_action_inputs_only', 'censor_rnn', 'treatment_rnn_action_inputs_only', 'treatment_rnn']
+        net_names = ['treatment_rnn_action_inputs_only', 'treatment_rnn']
 
     elif networks_to_train == "encoder":
         logging.info("Training R-MSN encoder")
@@ -79,8 +77,6 @@ if __name__ == "__main__":
                       'rnn_model': ("elu", 'linear'),
                       'treatment_rnn': ("tanh", 'sigmoid'),
                       'treatment_rnn_action_inputs_only': ("tanh", 'sigmoid'),
-                      'censor_rnn': ("tanh", 'sigmoid'),
-                      'censor_rnn_action_inputs_only': ("tanh", 'sigmoid'),
                       }
 
     # Setup tensorflow
@@ -116,22 +112,17 @@ if __name__ == "__main__":
 
         # Pull datasets
         b_predict_actions = "treatment_rnn" in net_name
-        b_predict_censoring = "censor_rnn" in net_name
         use_truncated_bptt = net_name != "rnn_model_bptt" # whether to train with truncated backpropagation through time
         b_propensity_weight = "rnn_propensity_weighted" in net_name
         b_use_actions_only = "rnn_action_inputs_only" in net_name
 
-        # checks
-        if b_predict_actions and b_predict_censoring:
-            raise ValueError("problem with RNN! RNN is both actions and censoring")
-
        # Extract only relevant trajs and shift data
         training_processed = core.get_processed_data(training_data, scaling_data, b_predict_actions,
-                                                     b_use_actions_only, b_predict_censoring)
+                                                     b_use_actions_only, False)
         validation_processed = core.get_processed_data(validation_data, scaling_data, b_predict_actions,
-                                                       b_use_actions_only, b_predict_censoring)
+                                                       b_use_actions_only, False)
         test_processed = core.get_processed_data(test_data, scaling_data, b_predict_actions,
-                                                 b_use_actions_only, b_predict_censoring)
+                                                 b_use_actions_only, False)
 
         num_features = training_processed['scaled_inputs'].shape[-1]
         num_outputs = training_processed['scaled_outputs'].shape[-1]
