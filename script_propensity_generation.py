@@ -14,6 +14,7 @@ import core_routines as core
 from core_routines import test
 
 import numpy as np
+import pickle
 import logging
 import os
 
@@ -203,4 +204,8 @@ if __name__ == "__main__":
 
     get_propensity_weights(num, den, b_denominator_only=True)
     get_propensity_weights(num, den, b_denominator_only=False)
+    weights_save_path = os.path.join(MODEL_ROOT, "weights.p")
+    with open(weights_save_path, 'wb') as file:
+        pickle.dump(weights, file)
+
 
