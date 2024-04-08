@@ -577,7 +577,7 @@ def get_cancer_sim_data(chemo_coeff, radio_coeff, b_load,  b_save=False, seed=10
     def _generate():
         num_time_steps = 60  # about half a year
         np.random.seed(seed)
-        num_patients = 500
+        num_patients = 2000
 
         params = sim.get_confounding_params(num_patients, chemo_coeff=chemo_coeff,
                                             radio_coeff=radio_coeff)

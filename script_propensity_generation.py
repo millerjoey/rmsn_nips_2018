@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     # Action with trajs
     weights = {k: get_weights_from_config(configs[k]) for k in configs}
-
+    predictions = {k: get_predictions(configs[k])[0] for k in configs}
     den = weights['action_den']
     num = weights['action_num']
 
@@ -204,8 +204,9 @@ if __name__ == "__main__":
 
     get_propensity_weights(num, den, b_denominator_only=True)
     get_propensity_weights(num, den, b_denominator_only=False)
-    weights_save_path = os.path.join(MODEL_ROOT, "weights.p")
-    with open(weights_save_path, 'wb') as file:
-        pickle.dump(weights, file)
+
+    predictions_save_path = os.path.join(MODEL_ROOT, "predictions.p")
+    with open(predictions_save_path, 'wb') as file:
+        pickle.dump(predictions, file)
 
 
