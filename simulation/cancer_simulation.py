@@ -95,8 +95,8 @@ def get_standard_params(num_patients):  # additional params
     possible_patient_types = [1, 2, 3]
     patient_types = np.random.choice(possible_patient_types,
                                      num_patients)
-    chemo_mean_adjustments = np.array([0.0 if i < 3 else 0.1 for i in patient_types])
-    radio_mean_adjustments = np.array([0.0 if i > 1 else 0.1 for i in patient_types])
+    chemo_mean_adjustments = np.array([0.0 if i < 3 else 0.2 for i in patient_types])
+    radio_mean_adjustments = np.array([0.0 if i > 1 else 0.2 for i in patient_types])
 
     total = 0
     for k in cancer_stage_observations:
