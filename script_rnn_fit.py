@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # Generate biased observational data to use for training
     chemo_coeff = 10
-    radio_coeff = 10
+    radio_coeff = 3
 
     # Simulate
     pickle_map = core.get_cancer_sim_data(chemo_coeff, radio_coeff, b_load=True, b_save=True)
