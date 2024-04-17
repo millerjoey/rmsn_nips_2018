@@ -291,11 +291,11 @@ def simulate(simulation_params, num_time_steps, assigned_actions=None):
         b_recover = False
         for t in range(1, num_time_steps):
 
-            cancer_volume[i, t] = cancer_volume[i, t - 1] * (1 + \
+            cancer_volume[i, t] = abs(cancer_volume[i, t - 1] * (1 + \
                                   + rho * np.log(K / cancer_volume[i, t - 1]) \
                                   - beta_c * chemo_dosage[i, t - 1] \
                                   - (alpha * radio_dosage[i, t - 1] + beta * radio_dosage[i, t - 1] ** 2) \
-                                  + noise[t])  # add noise to fit residuals
+                                  + noise[t]))  # add noise to fit residuals
 
             current_chemo_dose = 0.0
             previous_chemo_dose = 0.0 if t == 0 else chemo_dosage[i, t-1]
@@ -334,12 +334,10 @@ def simulate(simulation_params, num_time_steps, assigned_actions=None):
             chemo_dosage[i, t] = previous_chemo_dose * np.exp(-np.log(2) / drug_half_life) + current_chemo_dose
 
             if cancer_volume[i, t] > tumour_death_threshold:
-                cancer_volume[i, t] = tumour_death_threshold
                 b_death = True
                 
             # recovery threshold as defined by the previous stuff
             if recovery_rvs[i, t] < np.exp(-cancer_volume[i, t] * tumour_cell_density):
-                cancer_volume[i, t] = 0
                 b_recover = True
 
         # Package outputs
