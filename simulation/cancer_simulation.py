@@ -336,13 +336,11 @@ def simulate(simulation_params, num_time_steps, assigned_actions=None):
             if cancer_volume[i, t] > tumour_death_threshold:
                 cancer_volume[i, t] = tumour_death_threshold
                 b_death = True
-                break  # patient death
-
+                
             # recovery threshold as defined by the previous stuff
             if recovery_rvs[i, t] < np.exp(-cancer_volume[i, t] * tumour_cell_density):
                 cancer_volume[i, t] = 0
                 b_recover = True
-                break
 
         # Package outputs
         sequence_lengths[i] = int(t+1)
