@@ -309,7 +309,8 @@ def test(training_dataset,
 
             # Get the right model
             model = RnnModel(model_parameters)
-            handles = model.get_prediction_graph(use_validation_set=False if 'treatment_rnn' not in net_name  else None,
+            # None here will use training set.
+            handles = model.get_prediction_graph(None,#use_validation_set=False if 'treatment_rnn' not in net_name  else None,
                                                  with_dropout=False,
                                                  b_use_state_initialisation=b_use_state_initialisation,
                                                  b_dump_all_states=b_dump_all_states)
@@ -341,6 +342,8 @@ def test(training_dataset,
                     states.append(ave_states)
                 except tf.errors.OutOfRangeError:
                     break
+
+            np.save('models/rnn_propensity_weighted/training_predictions.npy', np.concatenate(means, axis=0))
 
             means = np.concatenate(means, axis=0) * training_dataset['output_stds']\
                     + training_dataset['output_means']

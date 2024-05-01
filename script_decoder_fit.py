@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
     # Load biased observational data for training
     chemo_coeff = 10
-    radio_coeff = 10
+    radio_coeff = 3
     b_load = True
     b_save = True
     pickle_map = core.get_cancer_sim_data(chemo_coeff, radio_coeff, b_load=b_load, b_save=b_save)
