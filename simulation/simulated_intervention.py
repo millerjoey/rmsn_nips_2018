@@ -195,8 +195,9 @@ def simulate(simulation_params, num_time_steps, assigned_actions=None):
 
     return outputs
 
-
-assigned_actions = np.random.randint(0, 2, (10000, 60, 2))
+assigned_actions = np.zeros((10000, 60, 2))
+assigned_actions[:, :, 0] = np.random.choice([0, 1], size=(10000, 60), p=[0.98, 0.02])
+assigned_actions[:, :, 1] = np.random.choice([0, 1], size=(10000, 60), p=[0.80, 0.20])
 
 tumor_data = _generate(True, assigned_actions=assigned_actions)
 
