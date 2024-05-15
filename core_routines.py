@@ -310,7 +310,7 @@ def test(training_dataset,
             # Get the right model
             model = RnnModel(model_parameters)
             # None here will use training set.
-            handles = model.get_prediction_graph(None,#use_validation_set=False if 'treatment_rnn' not in net_name  else None,
+            handles = model.get_prediction_graph(use_validation_set=False if 'treatment_rnn' not in net_name  else None,
                                                  with_dropout=False,
                                                  b_use_state_initialisation=b_use_state_initialisation,
                                                  b_dump_all_states=b_dump_all_states)

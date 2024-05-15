@@ -82,7 +82,7 @@ if __name__ == "__main__":
         test_data = pickle_map['test_data']
 
         # Use scaling data only from the original
-        scale_map = core.get_cancer_sim_data(10, 10, b_load=True, b_save=True, seed=100)
+        scale_map = core.get_cancer_sim_data(10, 3, b_load=True, b_save=True, seed=100)
         scaling_data = scale_map['scaling_data']
 
         # Pull datasets
@@ -211,7 +211,7 @@ if __name__ == "__main__":
                     max_norm = spec[5]
                     hidden_activation, output_activation = activation_map[net_name]
 
-                    _, _, mse, _ \
+                    means, _, mse, _ \
                         = test(training_processed, validation_processed, test_processed, tf_config,
                                seq_net_name, expt_name, dropout_rate, num_features, num_outputs,
                                memory_multiplier, num_epochs, minibatch_size, learning_rate, max_norm,
@@ -221,6 +221,11 @@ if __name__ == "__main__":
                                b_use_memory_adapter=b_apply_memory_adapter)
 
                     mse = mse.flatten()
+
+                    # Save decoder outputs if chemo == 10 and radio == 3:
+                    if chemo_coeff == 10 and radio_coeff == 3:
+                        np.save(os.path.join(RESULTS_FOLDER, seq_net_name + "_means.npy"), means)
+                        np.save(os.path.join(RESULTS_FOLDER, seq_net_name + "_outputs.npy"), mse)
 
                     for proj_idx in range(mse.shape[0]):
 
