@@ -190,8 +190,8 @@ if __name__ == "__main__":
                                              columns=[i for i in range(max_coeff + 1)])
         projection_map[seq_net_name] = {}
 
-        for chemo_coeff in [i for i in range(max_coeff + 1)]:
-            for radio_coeff in [i for i in range(max_coeff + 1)]:
+        for chemo_coeff in [10]:# [i for i in range(max_coeff + 1)]:
+            for radio_coeff in [3]:#[i for i in range(max_coeff + 1)]:
 
                     # Data setup
                     training_processed, validation_processed, test_processed = \
@@ -211,7 +211,7 @@ if __name__ == "__main__":
                     max_norm = spec[5]
                     hidden_activation, output_activation = activation_map[net_name]
 
-                    means, _, mse, _ \
+                    means, output, mse, _ \
                         = test(training_processed, validation_processed, test_processed, tf_config,
                                seq_net_name, expt_name, dropout_rate, num_features, num_outputs,
                                memory_multiplier, num_epochs, minibatch_size, learning_rate, max_norm,
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                     # Save decoder outputs if chemo == 10 and radio == 3:
                     if chemo_coeff == 10 and radio_coeff == 3:
                         np.save(os.path.join(RESULTS_FOLDER, seq_net_name + "_means.npy"), means)
-                        np.save(os.path.join(RESULTS_FOLDER, seq_net_name + "_outputs.npy"), mse)
+                        np.save(os.path.join(RESULTS_FOLDER, seq_net_name + "_outputs.npy"), output)
 
                     for proj_idx in range(mse.shape[0]):
 
