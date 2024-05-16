@@ -43,7 +43,7 @@ net_names = ['rnn_propensity_weighted']
 
 
 # Data processing Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def process_seq_data(data_map, states, projection_horizon=5, num_features_to_include=1e6):  # forecast 10 years into the future
+def process_seq_data(data_map, states, projection_horizon=6, num_features_to_include=1e6):  # forecast 10 years into the future
 
     def _check_shapes (array1, array2, dims):
         a1_shape = array1.shape
